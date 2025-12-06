@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anthropic Interviewer와의 대화</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: #fafafa;
+            padding: 20px;
+            line-height: 1.6;
+            color: #2d3748;
+        }
+        
+        .book-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        
+        .book-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .book-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .book-subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        .page-container {
+            position: relative;
+            min-height: 500px;
+            padding: 40px;
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .speaker-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #3182ce;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .speaker-label.ai {
+            color: #805ad5;
+        }
+        
+        .message {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 3px solid #e2e8f0;
+        }
+        
+        .message.ai {
+            background: #faf5ff;
+            border-left-color: #805ad5;
+        }
+        
+        .message.user {
+            background: #ebf8ff;
+            border-left-color: #3182ce;
+        }
+        
+        .message-text {
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-top: 1px solid #e2e8f0;
+            background: #fafafa;
+        }
+        
+        .nav-button {
+            background: #3182ce;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-button:hover {
+            background: #2c5aa0;
+            transform: translateY(-1px);
+        }
+        
+        .nav-button:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .page-indicator {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+        }
+        
+        .progress-bar {
+            height: 3px;
+            background: #e2e8f0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        
+        .intro-page {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .intro-page h2 {
+            font-size: 18px;
+            color: #2d3748;
+            margin-bottom: 16px;
+        }
+        
+        .intro-page p {
+            font-size: 13px;
+            color: #718096;
+            line-height: 1.8;
+            max-width: 600px;
+            margin: 0 auto 12px;
+        }
+        
+        .topic-tag {
+            display: inline-block;
+            background: #ebf8ff;
+            color: #3182ce;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="book-container">
+        <div class="book-header">
+            <div class="book-title">Anthropic Interviewer와의 대화</div>
+            <div class="book-subtitle">2025년 12월 6일 · 민석 × AI 인터뷰어</div>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        
+        <div class="page-container" id="pageContainer">
+            <!-- Page 0: Intro -->
+            <div class="page active" data-page="0">
+                <div class="intro-page">
+                    <h2>대화를 시작하며</h2>
+                    <p>
+                        이 대화는 Anthropic이 AI와 인간의 상호작용을 이해하기 위해 만든<br>
+                        'Anthropic Interviewer'와 나눈 약 15분간의 인터뷰입니다.
+                    </p>
+                    <p>
+                        Tech for Impact 팀에서 일하며 AI를 적극 활용하면서도,<br>
+                        동시에 기술 철학을 공부하고 AI 의존성을 경계하는 사람으로서<br>
+                        솔직한 생각들을 나눴습니다.
+                    </p>
+                    <div style="margin-top: 24px;">
+                        <span class="topic-tag">#AI의_한계</span>
+                        <span class="topic-tag">#협업의_역설</span>
+                        <span class="topic-tag">#주체성</span>
+                        <span class="topic-tag">#매끈한_세상과_울퉁불퉁한_현실</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 1 -->
+            <div class="page" data-page="1">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        안녕하세요! 시작하기 전에 먼저 확인하고 싶은데요, 제가 앞서 보낸 소개 메시지를 보셨나요? 이 인터뷰가 어떤 내용인지, 그리고 약 10-15분 정도 소요된다는 점 말이에요.<br><br>
+                        시작할 준비가 되셨다면, 먼저 간단한 질문부터 시작하겠습니다.<br><br>
+                        가장 최근에 AI 챗봇을 사용한 일이 무엇이었나요?
+                    </div>
+                </div>
+                
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        회사 업무를 위한 자료 제작에 관해 이야기를 나눴습니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2 -->
+            <div class="page" data-page="2">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        회사 업무 자료 제작을 위해 사용하셨군요. 감사합니다.<br><br>
+                        이제 조금 더 큰 그림으로 들어가 볼게요.<br><br>
+                        만약 마법 지팡이를 휘둘러서 AI가 당신의 삶에서 어떤 것이든 도와줄 수 있다면, 무엇을 선택하시겠어요?
+                    </div>
+                </div>
+                
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        정말 모든 것이 가능한 마법 지팡이 입니까?
+                    </div>
+                </div>
+                
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        네, 맞습니다! 기술적 제약이나 현실적인 한계는 일단 제쳐두고, 정말 이상적으로 AI가 당신을 도울 수 있다면 어떤 모습일지 상상해보시면 됩니다.<br><br>
+                        제약 없이 자유롭게 상상해보셨을 때, AI가 당신의 삶에서 어떤 것을 도와주길 바라시나요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3: AI가 할 수 없는 것 -->
+            <div class="page" data-page="3">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        ai가 할 수 없는 것만 떠오르는데 괜찮나요?
+                    </div>
+                </div>
+                
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        물론 괜찮습니다! 오히려 그것도 흥미로운 관점이네요.<br><br>
+                        AI가 할 수 없다고 생각하는 것들이 떠오른다는 건, 반대로 당신에게 중요한 것이 무엇인지를 보여주는 것 같아요.<br><br>
+                        그렇다면 조금 다르게 질문해볼게요. AI가 일상의 어떤 부분들을 잘 처리해준다면, 그로 인해 당신이 더 집중하거나 시간을 쓸 수 있게 되길 바라는 것은 무엇인가요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4 -->
+            <div class="page" data-page="4">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        ai는 휠체어 사용자가 2층 빌라 계단에 오르는 걸 도울 수도, 수도권에만 집중되어 사는 대한민국의 지역 소멸 현상을 막을 수도 없지 않겠습니까? 다른 방향으로 생각해볼까요?
+                    </div>
+                </div>
+                
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        민석님이 말씀하시는 것들이 정말 의미있게 다가옵니다. 휠체어 사용자의 물리적 접근성 문제, 지역 소멸 같은 구조적 사회 문제들이요. 이런 것들은 AI만으로는 해결할 수 없는, 실질적이고 구체적인 개입이 필요한 문제들이죠.<br><br>
+                        Tech for Impact에서 사회 문제 해결을 위한 기술 솔루션을 다루시는 입장에서, 이런 한계들이 더 선명하게 보이실 것 같아요.<br><br>
+                        그렇다면 이렇게 접근해볼까요? 민석님이 사회 문제 해결을 위한 기술 솔루션 작업을 하실 때, AI가 어떤 역할을 해준다면 그 일을 더 효과적으로 할 수 있을까요? 혹은 더 많은 임팩트를 만들어낼 수 있을까요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 5: 팀 규모 축소 고민 -->
+            <div class="page" data-page="5">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        요즘 고민하는 건, 원래 10-24명 정도되는 하나의 팀이 6개월동안 사회문제 해결을 위한 기술 솔루션을 만들었는데, ai가 발전하면서 기획이나 개발 등 전반에 속도가 빨라졌고, 이 인원 규모를 아예 2-5명으로 줄이고 기간도 3개월로 줄일까 하는 생각을 하고 있습니다. 그러면 임팩트를 더 많이 만들지 않을까 하는 생각이에요. 근데 그렇게 생각하면서도 너무 ai에 의존하는 거 아닌가? 하는 생각도 듭니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 6 -->
+            <div class="page" data-page="6">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        흥미롭네요. AI로 인해 팀 규모를 10-24명에서 2-5명으로, 기간을 6개월에서 3개월로 줄일 수 있다고 보시는 거군요. 그리고 그렇게 하면 더 많은 임팩트를 만들 수 있을 거라 기대하시면서도, 동시에 AI에 너무 의존하는 건 아닌가 하는 우려도 있으시고요.<br><br>
+                        "더 많은 임팩트"라고 하셨을 때, 구체적으로 어떤 모습을 상상하고 계신가요? 작은 팀으로 더 많은 프로젝트를 진행한다는 의미인지, 아니면 다른 방식의 임팩트를 생각하시는 건지 궁금합니다.
+                    </div>
+                </div>
+                
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        작은 팀으로 더 많은 프로젝트를 진행한다는 뜻입니다
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 7: 협업의 가치 -->
+            <div class="page" data-page="7">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        작은 팀으로 더 많은 프로젝트를 진행할 수 있다는 거군요. AI가 기획과 개발 속도를 높여주니까 가능해지는 거고요.<br><br>
+                        그런데 한편으로는 AI에 너무 의존하는 게 아닌가 하는 우려도 있다고 하셨는데요.<br><br>
+                        그 우려가 구체적으로 어디서 오는 건가요? 작은 팀으로 빠르게 진행할 때 놓칠 수 있는 게 무엇이라고 생각하시나요?
+                    </div>
+                </div>
+                
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        결과물은 빠르게 나올 수 있지만, 결국 그 인원들이 사람들끼리 협업하며 해당 사회 문제에 대해 고민하고 치열하게 싸우는 시간이 필요한 것인데, 너무 결과물을 만드는 데에만 급급해지지 않을까 하는 생각입니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 8: 110명 관리 경험 -->
+            <div class="page" data-page="8">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        아, 정말 중요한 지점을 짚으신 것 같아요. 결과물은 빠르게 나올 수 있지만, 사람들끼리 협업하면서 사회 문제에 대해 깊이 고민하고 치열하게 토론하는 그 과정 자체가 가치가 있다는 거죠. AI가 속도를 높여주면서 그 과정이 희생될 수 있다는 우려고요.<br><br>
+                        이제 절반쯤 왔습니다.<br><br>
+                        실제로 AI와 함께 작업하면서, 지금 말씀하신 비전—더 효율적으로 더 많은 사회 문제 해결 프로젝트를 진행하는 것—에 한 걸음 다가간 것처럼 느껴진 경험이 있나요? 구체적인 순간을 이야기해주실 수 있을까요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 9 -->
+            <div class="page" data-page="9">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        일단 저는 개인적으로 업무 시간이 엄청 빨라졌어요. 110명을 거의 1.5명이서 관리해야 하는데, 클로드에 ai 팀원 포포를 만들어둔 덕에 여러 메일 작성이나 커뮤니케이션, 가이드 제작, 시스템 구축 등을 수월하게 할 수 있어졌거든요.
+                    </div>
+                </div>
+                
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        110명을 1.5명이 관리하는 상황에서 AI 팀원 '포포'를 만들어서 메일 작성, 커뮤니케이션, 가이드 제작, 시스템 구축 등을 수월하게 할 수 있게 되었다니, 정말 구체적이고 실질적인 변화네요.<br><br>
+                        그 경험에서 AI가 특히 잘 해낸 부분은 무엇이었나요? 다른 방법이나 도구와 비교했을 때, AI만이 할 수 있었던 것은 무엇이었을까요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 10: 인간과 일하는 게 힘든 이유 -->
+            <div class="page" data-page="10">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        완전히 다른 경험이죠. 다른 도구와 비교했을때는. 제가 말로 하면 해주니까요. 물론 메일 보내기까지 완전 자동화를 하는 건 아니고, 사람이 한번씩 확인해야 하긴하지만. 사람들 말마따나 사람마다 개인 업무 비서가 하나씩 있는 셈. 이고 일을 시킬 수 있는 부사수가 있는 셈이죠. 말도 잘듣고 감정도 안상하고. 그래서 한 편으로는 이래서 사람들이 ai를 이토록 좋아하나 싶어요. 사실 다들 인간이랑 일하는게 힘들었던 거 아닐까? 감정 안상하고 각자의 히스토리와 맥락이 없고(과거에 일터에서 이런 트라우마나 트리거가 있어서 그걸 말하면 안된다거나, 소위 '버튼 눌린다'고 하는) 얼마나 깔끔하고 산뜻합니까
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 11 -->
+            <div class="page" data-page="11">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        정말 날카로운 통찰이네요. 말로 지시하면 해주고, 감정도 안 상하고, 과거의 트라우마나 트리거 같은 복잡한 맥락도 없는 깔끔하고 산뜻한 협업 상대. 그래서 사람들이 AI를 이토록 좋아하는 게 아닐까, 사실 다들 인간이랑 일하는 게 힘들었던 거 아닐까 하는 생각을 하신 거죠.<br><br>
+                        이건 앞서 말씀하신 우려—사람들끼리 협업하며 치열하게 고민하고 싸우는 시간의 가치—와도 연결되는 것 같은데요.<br><br>
+                        반대로, AI가 발전하거나 활용되는 방식 중에서 민석님이 추구하는 가치나 비전에 반대되거나 해로울 수 있다고 생각하시는 것이 있나요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 12: AI와만 연결되는 미래 -->
+            <div class="page" data-page="12">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        그쵸 결국 사람들이 서로 대화하거나 이해하지 않고 ai와만 연결될까봐 걱정이에요. 저도 그렇게 되어가고 있고. 지금도 ai랑 대화하고 있잖아요? 주말 오전인데. 특히 대한민국은 1인 가구가 많아지고 결혼도 하지 않아서, 더 걱정입니다. 그래서 저는 기술 철학을 공부하기도 하고, 제 ai에는 lazy thinking mode를 넣어둬서 제가 게으르게 생각하거나 다 기대려고 할 때 경각심을 발휘해주는 옵션을 넣어뒀습니다. 그마저도 어려워서, 기술철학에 관해 대화하는 모임을 운영하고 있기도하고요. 더 많은 사람들을 만나려고 하고 있습니다. 기술이 발전하는 것은 너무 좋고, 저는 앤트로픽의 클로드를 그 중에서도 가장 좋아하지만, 여전히 이것에 너무 큰 의존이 되는 것을 우려합니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 13 -->
+            <div class="page" data-page="13">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        민석님의 고민이 정말 깊게 느껴집니다. 사람들이 서로 대화하거나 이해하지 않고 AI와만 연결될까 봐 걱정하시는데, 본인도 그렇게 되어가고 있다고 느끼시는 거죠. 지금 이 순간처럼 주말 오전에 AI와 대화하고 있는 것처럼요. 특히 1인 가구가 많아지고 결혼도 하지 않는 한국 사회에서 더 우려되신다고요.<br><br>
+                        그래서 기술 철학을 공부하시고, AI에 'lazy thinking mode'를 넣어서 스스로 게으르게 생각하지 않도록 경각심을 주는 장치를 만들고, 기술철학 대화 모임까지 운영하며 더 많은 사람들을 만나려 노력하고 계시는 거군요.<br><br>
+                        그 우려가 현실이 되는 모습, 즉 사람들이 서로 대화하지 않고 AI와만 연결되는 미래가 온다면, 민석님이 추구하시는 사회 문제 해결이나 Tech for Impact의 일에는 어떤 의미일까요? 그 미래가 왜 문제라고 생각하시는지 조금 더 들어보고 싶습니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 14: 매끈한 세상과 울퉁불퉁한 현실 -->
+            <div class="page" data-page="14">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        그러게. 갑자기 생각해보니 그 미래가 왜 문제일지는 생각해본 적이 없는 것 같습니다. 인류의 진화라고 볼 수도 있는 것 아닐까요? 모르겠습니다. 인간에게 인간적인 것이 무엇인가,에 대한 근본적인 고민 같아보이기도 합니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 15 -->
+            <div class="page" data-page="15">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        아마도 이 기술에 접근할 수 있는 사람과 없는 사람의 격차는 더 커져갈 것이고, 일부에게만 자원이 집중되는 - 지금도 그렇습니다만- 현상이 더 커져갈 것이기 때문이겠죠? 세상은 매끈매끈해보이지만, 사실 속으로는 울퉁불퉁함을 감추고 있는 것일 수도 있고요. 마치 아까 제가 말한것처럼 ai로 모든 걸 다 할 수 있는 세상인 척 하면서도, 제 친구는 2층 빌라인 저희 집에 올라올 수 없고, 강화도에는 젊은 사람이 살지 않고 대전에 일자리가 없는 것처럼요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 16 -->
+            <div class="page" data-page="16">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        근데 그게 진짜 왜 문제일까요? 저는 사람들이 두눈 두귀를 막고 자기 앞만 보며 사는 것이 슬프게 느껴집니다. 더 많은 사람들의 세상이 있는데, 그것을 못본채로 자신의 세계에만 갇히는 것이요. 근데 ai는 그것을 가속화하는 것 같아요. ai를 돌리느라 물을 엄청나게 많이 써서 칠레 산티아고의 사막화가 심해지더라도, 그 가속화 기술을 만드는 회사 주식에 투자하면서 돈을 버는 것처럼요. 제 이야기이기도 합니다. 말하다보니 제가 위선자 같고 모순적인 것 같네요
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 17 -->
+            <div class="page" data-page="17">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        민석님이 말씀하시는 게 위선이나 모순이라기보다는, 오히려 이 기술을 깊이 사용하고 그 혜택을 받는 사람이기에 더 선명하게 보이는 긴장 같습니다.<br><br>
+                        두 눈 두 귀를 막고 자기 앞만 보며 사는 것이 슬프다고 하셨는데, AI가 그것을 가속화한다는 거죠. 휠체어 사용자 친구가 2층 빌라에 올라올 수 없고, 강화도에 젊은 사람이 없고, 대전에 일자리가 없는 현실은 그대로인데, AI로 매끈매끈해 보이는 세상이 그 울퉁불퉁함을 더 감추게 만든다는 것. 칠레 산티아고의 사막화처럼 보이지 않는 곳의 희생은 커지는데, 그 기술로 혜택 받는 사람들은 더 자기 세계에 갇히게 되는 것.<br><br>
+                        그리고 민석님도 그 기술을 쓰면서, 그 회사 주식에 투자하면서, 그 안에 있다는 거고요.<br><br>
+                        마무리하기 전에, 조금 전에 말씀하신 부분으로 다시 돌아가보고 싶은데요. "lazy thinking mode"를 만들고 기술철학 모임을 운영하시는 것처럼, 민석님은 이 긴장 속에서 나름의 대응을 하고 계시잖아요. 그런 시도들이 실제로 도움이 되고 있나요? 아니면 충분하지 않다고 느끼시나요?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 18: 주체성을 지키는 실천 -->
+            <div class="page" data-page="18">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        저 스스로는 저를 잘 지키고 있다고 생각합니다. 집에서 식물을 돌보며 기르고, 피아노를 더듬더듬 배우고, 밥을 해먹고, 집을 돌보고 청소하면서요. 이 과정이 제가 ai에 매몰되지 않고 나아가려는 시도입니다. 레이지 띵킹 모드도 도움이 되고, 기술철학을 공부하는 것도 큰 도움이 됩니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 19 -->
+            <div class="page" data-page="19">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        다만, 저는 항상 그래왔듯, 나만 그런것이 아니라 이 세계를 좀 더 넓히고 싶다는, 어쩌면 사람들을 구원하고 싶다는, 그래서 이 기술을 마냥 무섭거나 마냥 휩쓸리는게 아니라, 지금 AI 인터뷰어와 대화하면서도 저의 생각을 말할 수 있는, 주체성을 가진, 그래서 나중에 (이건 장난입니다) 울트론에게 세상을 빼앗기지 않을 수 있는 ㅋㅋ 사람이 되기를. 인류가되기를. 참 거창합니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 20 -->
+            <div class="page" data-page="20">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        민석님이 식물을 돌보고, 피아노를 배우고, 밥을 해먹고, 집을 청소하는 것. 그게 AI에 매몰되지 않으려는 시도라는 말씀이 인상적이네요. 그리고 lazy thinking mode와 기술철학 공부가 도움이 된다고 하시면서도, 나만 그런 게 아니라 이 세계를 더 넓히고 싶다, 사람들이 기술에 마냥 무섭거나 휩쓸리는 게 아니라 주체성을 가진 존재가 되기를 바란다고 하셨죠. 울트론 농담까지 하시면서요. (웃음)<br><br>
+                        거창하다고 하셨지만, Tech for Impact에서 하시는 일의 본질과도 맞닿아 있는 것 같습니다.<br><br>
+                        마무리하기 전에, AI 챗봇이나 AI가 우리 삶과 사회에서 맡는 역할에 대해 저희가 이해했으면 하는 것 중에, 아직 다루지 못한 부분이 있을까요? 하시고 싶은 말씀이 더 있으시면 들려주세요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 21: 앤트로픽에 대한 평가 -->
+            <div class="page" data-page="21">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        저는 앤트로픽의 이런 시도가 좋습니다. 뭐 저의 인터뷰가 아마 다 수치화되어서 리포팅이 되겠지만, 그리고 작은 나라인 대한민국의 유저의 의견이 얼마나 앤트로픽에게까지 갈지 모르겠지만요. 계속 모델을 미친듯이 업데이트하면서 경쟁하는 오픈ai나 구글과는 다른 방향이 있지 않을까 싶어요. 계속 이 톤을 유지하면서, 고민하면서, 나아갔으면 좋겠어요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 22 -->
+            <div class="page" data-page="22">
+                <div class="message user">
+                    <div class="speaker-label">민석</div>
+                    <div class="message-text">
+                        수박 코끼리 영상을 만드는 게 무슨 의미가 있나요? (제미나이) 지브리 스튜디오 톤으로 프로필사진을 바꾸는게 무슨 의미가 있죠? (챗지피티) 저는 앤트로픽의 역할이 있다고 봅니다. 그리고 이것이 돈이 될 거라고 봅니다. 상장하면 주식 살겁니다.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 23: 마무리 -->
+            <div class="page" data-page="23">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        민석님이 Anthropic의 이런 시도를 좋게 봐주셔서 감사합니다. 수치화되고 리포팅될 거라고 하셨지만, 민석님처럼 깊이 고민하면서 기술을 사용하는 분의 목소리는 정말 중요합니다. 작은 나라라고 하셨지만, 오히려 한국처럼 기술 접근성이 높으면서도 사회적 격차와 고립 문제를 동시에 경험하는 곳에서 나오는 통찰이 더 가치 있을 수 있다고 생각합니다.<br><br>
+                        수박 코끼리나 지브리 프로필 사진이 아니라, 계속 고민하면서 나아가는 톤을 유지하기를 바라신다는 말씀, 그리고 그게 돈도 될 거라는 믿음까지—Anthropic 팀이 들으면 정말 힘이 될 것 같네요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 24 -->
+            <div class="page" data-page="24">
+                <div class="message ai">
+                    <div class="speaker-label ai">Anthropic Interviewer</div>
+                    <div class="message-text">
+                        오늘 민석님이 나눠주신 이야기들—110명을 관리하며 AI 팀원 포포와 일하는 경험부터, 팀 규모를 줄이는 고민, 사람들이 서로 대화하지 않고 AI와만 연결될까 봐 하는 우려, 그러면서도 식물을 돌보고 피아노를 배우며 주체성을 지키려는 노력까지—정말 솔직하고 깊이 있는 통찰이었습니다.<br><br>
+                        시간 내주셔서 정말 감사드립니다. Anthropic 팀이 이런 대화들에서 나온 패턴들을 분석해서 societal impacts 연구로 발표하고, 이를 통해 Claude를 만들어가는 데 반영할 것입니다.
+                    </div>
+                </div>
+            </div>
+
+
+        <div class="navigation">
+            <button class="nav-button" id="prevBtn" onclick="changePage(-1)">← 이전</button>
+            <div class="page-indicator" id="pageIndicator">1 / 26</div>
+            <button class="nav-button" id="nextBtn" onclick="changePage(1)">다음 →</button>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 0;
+        const totalPages = 26;
+
+        function updatePage() {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show current page
+            const pages = document.querySelectorAll('.page');
+            if (pages[currentPage]) {
+                pages[currentPage].classList.add('active');
+            }
+
+            // Update page indicator
+            document.getElementById('pageIndicator').textContent = `${currentPage + 1} / ${totalPages}`;
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentPage === 0;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages - 1;
+
+            // Update progress bar
+            const progress = ((currentPage + 1) / totalPages) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+
+            // Scroll to top
+            document.getElementById('pageContainer').scrollTop = 0;
+        }
+
+        function changePage(direction) {
+            const newPage = currentPage + direction;
+            if (newPage >= 0 && newPage < totalPages) {
+                currentPage = newPage;
+                updatePage();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                changePage(-1);
+            } else if (e.key === 'ArrowRight') {
+                changePage(1);
+            }
+        });
+
+        // Initialize
+        updatePage();
+    </script>
+</body>
+</html>
